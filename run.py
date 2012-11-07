@@ -29,8 +29,8 @@ def read_sentences(iterable):
 # Computes (local) features for word at position |i| given that label for word
 # at position |i - 1| is |previous_label|. You can pass any additional data
 # via |data| argument.
-MIN_WORD_FREQUENCY = 3
-MIN_LABEL_FREQUENCY = 3
+MIN_WORD_FREQUENCY = 5
+MIN_LABEL_FREQUENCY = 5
 
 def compute_features(data, words, poses, i, previous_label):
     # Condition on previous label.
@@ -42,7 +42,48 @@ def compute_features(data, words, poses, i, previous_label):
 
     labels = data["labelled_words"].get(words[i], dict())
     labels = filter(lambda item: item[1] > MIN_LABEL_FREQUENCY, labels.items())
+ 
+    if ((i == 0) or (words[i - 1] == '.')) and (words[i][0].isupper()):
+        yield "firstword-InitCaps"
+    if (i > 0) and (words[i - 1] != '.') and (words[i][0].isupper()):
+        yield "initCaps"
+    if ((i == 0) or (words[i - 1] == '.')) and (not words[i][0].isupper()):
+        yield "firstword-notInitCaps="
+    
+    # mixedCaps !!!
+    if (words[i].isupper()):
+        yield "allCaps"
 
+    
+    if (i > 0) and (words[i - 1][0].isupper()):
+        yield "initCaps_prev"
+    if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
+        yield "initCaps_next"
+    if (i > 0) and (words[i - 1][0].isupper()) and (i + 1 < len(words)) and (words[i + 1][0].isupper()):
+        if words[i][0].isupper(): 
+            yield "initCapsSequence"
+        else:
+            yield "notInitCapsSequence"
+    
+    yield "{0}".format(words[i])  
+    
+    if (i > 0):
+        if (words[i - 1][0].isupper()):
+		    yield "Prev,initCaps,{0}".format(words[i-1])
+        else:
+		    yield "Prev,notInitCaps,{0}".format(words[i-1])
+    
+    if (i + 1 < len(words)):
+        if (words[i + 1][0].isupper()):
+		    yield "Next,initCaps,{0}".format(words[i + 1])
+        else:
+		    yield "Next,notInitCaps,{0}".format(words[i + 1])
+   
+    
+        
+        
+
+    
     for label in labels:
         yield "was-labelled-as={0}".format(label)
 
@@ -54,7 +95,6 @@ def train_model(options, iterable):
 
     data["feature_set"] = set()
     data["word_frequencies"] = defaultdict(long)
-
     # XXX(sandello): defaultdict(lambda: defaultdict(long)) would be
     # a better choice here (for |labelled_words|) but it could not be pickled.
     # C'est la vie.
@@ -67,7 +107,6 @@ def train_model(options, iterable):
     for n, sentence in enumerate(iterable):
         if (n % 1000) == 0:
             print >>sys.stderr, "   {0:6d} sentences...".format(n)
-
         for word, pos, label in sentence:
             data["word_frequencies"][word] += 1
             if label.startswith("B-") or label.startswith("I-"):
@@ -78,19 +117,16 @@ def train_model(options, iterable):
 
     print >>sys.stderr, "*** Second pass: Collecting features..."
     model.begin_add_event()
-
     for n, sentence in enumerate(iterable):
         if (n % 1000) == 0:
             print >>sys.stderr, "   {0:6d} sentences...".format(n)
         words, poses, labels = map(list, zip(*sentence))
-		
         for i in xrange(len(labels)):
             features = compute_features(data, words, poses, i, labels[i - 1] if i >= 1 else "^")
             features = list(features)
             model.add_event(features, labels[i])
             for feature in features:
                 data["feature_set"].add(feature)
-
     model.end_add_event(options.cutoff)
     print >>sys.stderr, "*** Collected {0} features.".format(len(data["feature_set"]))
 
@@ -192,8 +228,6 @@ def main():
 
     with open(options.filename, "r") as handle:
         data = list(read_sentences(handle))
-	
-	# data = list(list(words, tag) = sentence)
 
     if options.train:
         print >>sys.stderr, "*** Training model..."
