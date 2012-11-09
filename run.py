@@ -10,7 +10,11 @@ import string
 
 import maxent
 
-from collections import defaultdict, Counter
+from collections import defaultdict
+try:
+    from collections import Counter
+except:
+    from counterfile import Counter
 from maxent import MaxentModel
 from optparse import OptionParser
 
@@ -43,10 +47,10 @@ def compute_features(data, words, poses, i, previous_label):
     # if previous_label != "O":
         # yield "label-previous={0}".format(previous_label) 
 
-    if data["word_frequencies"].get(words[i], 0) >= MIN_WORD_FREQUENCY:
-        yield "word-current={0}".format(words[i])
+    if data["word_frequencies"].get(string.lower(words[i]), 0) >= MIN_WORD_FREQUENCY:
+        yield "word-current={0}".format(string.lower(words[i]))
 
-    labels = data["labelled_words"].get(words[i], dict())
+    labels = data["labelled_words"].get(string.lower(words[i]), dict())
     labels = filter(lambda item: item[1] > MIN_LABEL_FREQUENCY, labels.items())
     for label in labels:
         yield "was-labelled-as={0}".format(label) 
@@ -77,9 +81,7 @@ def compute_features(data, words, poses, i, previous_label):
     if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-MISC"]) and (words[i][0].isupper()):
         # yield "UNI-MISC"
         yield "UNI-MISC={0}".format(string.lower(words[i - 1]))
-    
-#    if (previous_label != "^"):
-#        yield previous_label
+
         
         
     # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["ORG"]) and (words[i][0].isupper()):
@@ -137,13 +139,13 @@ def train_model(options, iterable):
         previous_word = "^"
         previous_label = "^"
         for word, pos, label in sentence:
-            data["word_frequencies"][word] += 1
+            data["word_frequencies"][string.lower(word)] += 1
             if label.startswith("B-") or label.startswith("I-"):
                 if word in data["labelled_words"]:
-                    data["labelled_words"][word][label] += 1
+                    data["labelled_words"][string.lower(word)][label] += 1
                 else:
-                    data["labelled_words"][word] = defaultdict(long)
-                    data["labelled_words"][word][label] = 1
+                    data["labelled_words"][string.lower(word)] = defaultdict(long)
+                    data["labelled_words"][string.lower(word)][label] = 1
             if label.startswith("B-") and (previous_word != "^"):
                 unigrams[label][string.lower(previous_word)] += 1
                 
@@ -165,7 +167,7 @@ def train_model(options, iterable):
         all_sum = sum([unigrams[label][word] for word in unigrams[label]])
         uni = sorted([[(1.0 * unigrams[label][word] * inv_total_freq[word] / all_sum ), word] for word in unigrams[label]])
         uni = [word[1] for word in uni]
-        data["unigrams"][label] = uni[-20:]
+        data["unigrams"][label] = uni[-25:]
         print >>sys.stderr, "*** Collected {0} unigrams for {1}".format(len(data["unigrams"][label]), label)
     
     
