@@ -10,11 +10,12 @@ import string
 
 import maxent
 
-from collections import defaultdict
+from collections import defaultdict, Counter
 from maxent import MaxentModel
 from optparse import OptionParser
 
 unigrams = dict()
+
 
 # |iterable| should yield lines.
 def read_sentences(iterable):
@@ -57,10 +58,10 @@ def compute_features(data, words, poses, i, previous_label):
         yield "After.{0}".format(previous_label)
     
     # if (previous_label == 'O') and (words[i][0].isupper()):
-        # yield "PrevPose.{0}".format(poses[i - 1])
-        # yield "CurPose.{0}".format(poses[i])
-        # yield "PrevPose-CurPose.{0}-{1}".format(poses[i-1], poses[i])
-    
+    #     yield "PrevPose.{0}".format(poses[i - 1])
+    #     yield "CurPose.{0}".format(poses[i])
+    #     yield "PrevPose-CurPose.{0}-{1}".format(poses[i-1], poses[i])
+
     if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-ORG"]) and (words[i][0].isupper()):
         # yield "UNI-ORG"
         yield "UNI-ORG={0}".format(string.lower(words[i - 1]))
@@ -76,6 +77,9 @@ def compute_features(data, words, poses, i, previous_label):
     if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-MISC"]) and (words[i][0].isupper()):
         # yield "UNI-MISC"
         yield "UNI-MISC={0}".format(string.lower(words[i - 1]))
+    
+#    if (previous_label != "^"):
+#        yield previous_label
         
         
     # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["ORG"]) and (words[i][0].isupper()):
@@ -99,6 +103,7 @@ def compute_features(data, words, poses, i, previous_label):
 def train_model(options, iterable):
     model = MaxentModel()
     data = {}
+    dumb_counter = 6
 
     data["feature_set"] = set()
     data["word_frequencies"] = defaultdict(long)
@@ -147,10 +152,25 @@ def train_model(options, iterable):
             previous_label = label
             previous_word = word
     
+
+    unigram_counters = [Counter(unigrams[key]) for key in unigrams]
+    total_count = Counter()
+    for counter in unigram_counters:
+         total_count += counter
+
+    total_count = dict(total_count)
+    inv_total_freq  = dict([[key, (math.log(sum(total_count.values()) /  total_count[key]) ** 3)] for key in total_count])
+    
     for label in unigrams:
-        all_sum = sum(unigrams[label][word] for word in unigrams[label])
-        data["unigrams"][label] = [word for word in unigrams[label] if 1.0 * unigrams[label][word] / all_sum > 0.005]
+        all_sum = sum([unigrams[label][word] for word in unigrams[label]])
+        uni = sorted([[(1.0 * unigrams[label][word] * inv_total_freq[word] / all_sum ), word] for word in unigrams[label]])
+        uni = [word[1] for word in uni]
+        data["unigrams"][label] = uni[-20:]
         print >>sys.stderr, "*** Collected {0} unigrams for {1}".format(len(data["unigrams"][label]), label)
+    
+    
+
+    print data["unigrams"]
     
     # for label in post_unigrams:
         # all_sum = sum(post_unigrams[label][word] for word in post_unigrams[label])
