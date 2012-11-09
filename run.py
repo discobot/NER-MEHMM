@@ -15,14 +15,6 @@ from maxent import MaxentModel
 from optparse import OptionParser
 
 unigrams = dict()
-unigrams["B-ORG"] = ['sindicatos' , 'propia' , 'gubernamental' , 'nuevo' , 'extremeña' , 'sobre' , 'club' , 'peruana' , 'o' , 'británico' , 'móvil' , 'juvenil' , 'su' , 'francés' , 'estadounidense' , 'donde' , 'terrorista' , 'equipo' , 'una' , 'filial' , 'revista' , 'e' , 'un' , 'para' , 'sindicato' , 'acceso' , 'británica' , 'española' , 'compañía' , 'alemán' , 'como' , 'empresa' , 'ante' , 'grupo' , 'diario' , 'contra' , 'los' , 'entre' , 'en' , 'por' , 'las' , 'que' , 'con', 'y' , 'a' , 'al' , 'de' , 'el' , 'del' , 'la']
-unigrams["B-LOC"] = ['junta' , 'ni' , 'central' , 'actual' , 'guerra' , 'riesgo' , 'las' , 'calles' , 'madrileña' , 'hotel' , 'vecina' , 'visitó' , 'pabellón' , 'grass' , 'cantabrico' , 'controlaba' , 'gaber' , 'masegosa' , 'privatizacion' , 'este' , 'estadio' , 'efe' , 'vecino' , 'antiguo' , 'o' , 'contra' , 'sobre' , 'hasta' , 'los' , 'lluvioso' , 'toda' , 'como' , 'que' , 'para' , 'por' , 'con' , 'al' , 'hacia' , 'entre' , 'cantabria' , 'desde' , 'despejado' , 'nuboso', 'la' , 'del' , 'el' , 'y' , 'a' , 'de' , 'en']
-unigrams["B-PER"] = ['dominicano' , 'uruguayo' , 'argentino' , 'ruso' , 'destacó' , 'manifestó' , 'profesor' , 'rusa' , 'centrocampista' , 'propio' , 'colombiano' , 'opositor' , 'socialista' , 'comandante' , 'efe' , 'añadió' , 'alemán' , 'holandés' , 'la' , 'periodista' , 'e' , 'británico' , 'brasileño' , 'indicó' , 'afirmó' , 'explicó' , 'o' , 'cardenal' , 'pp' , 'declaró' , 'estadounidense' , 'español' , 'señaló' , 'francés' , 'general' , 'mexicano' , 'el' , 'presidente' , 'italiano' , 'como' , 'los' , 'para' , 'con' , 'dijo' , 'que' , 'por' , 'según' , 'a' , 'de' , 'y']
-unigrams["B-MISC"] = ['actual' , 'conferencia' , 'segundo' , 'río' , 'origen' , 'olímpica' , 'promedio' , 'disco' , 'tienda' , 'crudo' , 'tanques' , 'transbordador' , 'esta' , 'libro' , 'o' , 'por' , 'tema' , 'grupo' , 'marca' , 'sección' , 'autopista' , 'lo' , 'página' , 'índice' , 'lema' , 'cultura' , 'revolucionó' , 'denominado' , 'sistema' , 'titulado' , 'exposición' , 'sobre' , 'proyecto' , 'a' , 'e' , 'este' , 'carretera' , 'las' , 'programa' , 'una' , 'como', 'al' , 'un' , 'en' , 'y' , 'los' , 'el' , 'del' , 'la' , 'de']
-# unigrams["B-ORG"] = ['distributeur' , 'lambiekbrouwer' , 'mediagroep' , 'nord' , 'persagentschap' , 'slorpt' , 'tourjournaal' , 'uitgeverij' , 'die' , 'via' , 'brusselse' , 'maar' , 'om' , 'krant' , 'holding' , 'club' , 'magazine' , 'rond' , 'franse' , 'tijdschrift' , 'tuincentrum' , 'amerikaanse' , 'zaterdag' , 'of' , 'over' , 'tussen' , 'heeft' , 'aan' , 'bedrijf' , 'live' , 'zakenbank' , 'volgens' , 'aandeel' , 'ook' , 'foto' , 'naar' , 'als' , 'zoals' , 'britse' , 'door' , 'op' , 'in' , 'dat' , 'met' , 'voor' , 'en' , 'bij' , 'het' , 'van' , 'de']
-# unigrams["B-LOC"] = ['dorp' , 'die' , 'restaurant' , 'provincie' , 'braziliaanse' , 'dorpje' , 'méér' , 'wijk' , 'heel' , 'galerie' , 'staat' , 'morning' , 'rond' , 'tot' , 'maar' , 'wil' , 'door' , 'over' , 'hoofdstad' , 'franse' , 'district' , 'rumoerige' , 'boven' , 'buiten' , 'zoals' , 'antwerpse' , 'stadje' , 'brusselse' , 'aan' , 'nabij' , 'binnen' , 'richting' , 'als' , 'vanuit' , 'bij' , 'of' , 'tussen' , 'stad' , 'met' , 'dat' , 'voor' , 'op' , 'tegen' , 'uit' , 'en' , 'het' , 'naar' , 'de' , 'van' , 'in']
-# unigrams["B-PER"] = ['schreef' , 'naar' , 'meneer' , 'waar' , 'liet' , 'gaf' , 'meent' , 'of' , 'vond' , 'had' , 'koning' , 'om' , 'wat' , 'architect' , 'regisseur' , 'prins' , 'op' , 'tussen' , 'zaken' , 'bij' , 'ook' , 'over' , 'is' , 'zoals' , 'bondscoach' , 'was' , 'tegen' , 'maar' , 'premier' , 'familie' , 'aan' , 'aldus' , 'burgemeester' , 'heeft' , 'minister' , 'toen' , 'zei' , 'die' , 'als' , 'volgens' , 'president' , 'professor' , 'pater' , 'voor' , 'door' , 'dat' , 'met' , 'zegt' , 'en' , 'van']
-# unigrams["B-MISC"] = ['heeft' , 'hele' , 'legendarische' , 'toenmalige' , 'gemiddelde' , 'om' , 'toenmalig' , 'naam' , 'mijn' , 'geen' , 'ook' , 'elke' , 'nieuwe' , 'finale' , 'zoals' , 'tweede' , 'is' , 'door' , 'uit' , 'oude' , 'gewezen' , 'aan' , 'grote' , 'zogeheten' , 'drie' , 'of' , 'vele' , 'eerste' , 'tijdens' , 'andere' , 'naar' , 'over' , 'miljoen' , 'alle' , 'dat' , 'jonge' , 'twee' , 'deze' , 'die' , 'met' , 'als' , 'voor' , 'op' , 'zijn' , 'en' , 'in' , 'van' , 'een' , 'het' , 'de']
 
 # |iterable| should yield lines.
 def read_sentences(iterable):
@@ -40,123 +32,74 @@ def read_sentences(iterable):
 # Computes (local) features for word at position |i| given that label for word
 # at position |i - 1| is |previous_label|. You can pass any additional data
 # via |data| argument.
-<<<<<<< HEAD
+
 MIN_WORD_FREQUENCY = 5
 MIN_LABEL_FREQUENCY = 5
-=======
-MIN_WORD_FREQUENCY = 2
-MIN_LABEL_FREQUENCY = 2
->>>>>>> Unigrams added. Stat.py rewrited
 
 def compute_features(data, words, poses, i, previous_label):
     # Condition on previous label.
-    if previous_label != "O":
-        yield "label-previous={0}".format(previous_label) 
+    # if previous_label != "O":
+        # yield "label-previous={0}".format(previous_label) 
 
     if data["word_frequencies"].get(words[i], 0) >= MIN_WORD_FREQUENCY:
         yield "word-current={0}".format(words[i])
 
     labels = data["labelled_words"].get(words[i], dict())
     labels = filter(lambda item: item[1] > MIN_LABEL_FREQUENCY, labels.items())
- 
-    if ((i == 0) or (words[i - 1] == '.')) and (words[i][0].isupper()):
-        yield "firstword-InitCaps"
-    if (i > 0) and (words[i - 1] != '.') and (words[i][0].isupper()):
-        yield "initCaps"
-    if ((i == 0) or (words[i - 1] == '.')) and (not words[i][0].isupper()):
-        yield "firstword-notInitCaps="
-    
-    # mixedCaps !!!
-    if (words[i].isupper()):
-        yield "allCaps"
-
-    
-    if (i > 0) and (words[i - 1][0].isupper()):
-        yield "initCaps_prev"
-    if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
-        yield "initCaps_next"
-    if (i > 0) and (words[i - 1][0].isupper()) and (i + 1 < len(words)) and (words[i + 1][0].isupper()):
-        if words[i][0].isupper(): 
-            yield "initCapsSequence"
-        else:
-            yield "notInitCapsSequence"
-    
-    yield "{0}".format(words[i])  
-    
-    if (i > 0):
-        if (words[i - 1][0].isupper()):
-		    yield "Prev,initCaps,{0}".format(words[i-1])
-        else:
-		    yield "Prev,notInitCaps,{0}".format(words[i-1])
-    
-    if (i + 1 < len(words)):
-        if (words[i + 1][0].isupper()):
-		    yield "Next,initCaps,{0}".format(words[i + 1])
-        else:
-		    yield "Next,notInitCaps,{0}".format(words[i + 1])
-   
-    
-        
-        
-
-    
     for label in labels:
         yield "was-labelled-as={0}".format(label)
-    
-    if (i > 0) and (string.lower(words[i - 1]) in unigrams["B-ORG"]):
-        yield "UNI-ORG"
-        yield "UNI-ORG={0}".format(string.lower(words[i - 1]))
-    
-    if (i > 0) and (string.lower(words[i - 1]) in unigrams["B-LOC"]):
-        yield "UNI-LOC"
-        yield "UNI-LOC={0}".format(string.lower(words[i - 1]))
-        
-    if (i > 0) and (string.lower(words[i - 1]) in unigrams["B-PER"]):
-        yield "UNI-PER"
-        yield "UNI-PER={0}".format(string.lower(words[i - 1]))
-    
-    if (i > 0) and (string.lower(words[i - 1]) in unigrams["B-MISC"]):
-        yield "UNI-MISC"
-        yield "UNI-MISC={0}".format(string.lower(words[i - 1]))
-    
-    
-    if (previous_label == "^") and (words[i][0].isupper()):
-        yield "firstword-InitCaps"
-    if (previous_label != "^") and (words[i][0].isupper()):
-        yield "initCaps"
-    if (previous_label == "^") and (not words[i][0].isupper()):
-        yield "firstword-notInitCaps"
+ 
+    # if ((previous_label == "^") or (words[i - 1] == '.')) and (words[i][0].isupper()):
+        # yield "firstword-InitCaps"
+    # if (previous_label != "^") and (words[i][0].isupper()):
+        # yield "initCaps"
+    # if ((previous_label == "^") or (words[i - 1] == '.')) and (not words[i][0].isupper()):
+        # yield "firstword-notInitCaps="
     
     # mixedCaps !!!
-    if (words[i].isupper()):
-        yield "allCaps"
+    # if (words[i].isupper()):
+        # yield "allCaps"
 
-    if (i > 0) and (words[i - 1][0].isupper()):
-        yield "initCaps_prev"
-    if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
-        yield "initCaps_next"
-    if (i > 0) and (words[i - 1][0].isupper()) and (i + 1 < len(words)) and (words[i + 1][0].isupper()):
-        if words[i][0].isupper(): 
-            yield "initCapsSequence"
-        else:
-            yield "notInitCapsSequence"
-            
-    if (i > 0):
-        if (words[i - 1][0].isupper()):
-		    yield "Prev_initCaps_{0}".format(words[i-1])
-        else:
-		    yield "Prev_notInitCaps_{0}".format(words[i-1])
     
-    if (i + 1 < len(words)):
-        if (words[i + 1][0].isupper()):
-		    yield "Next_initCaps_{0}".format(words[i + 1])
-        else:
-		    yield "Next_notInitCaps_{0}".format(words[i + 1])
+    # if (previous_label != "^") and (words[i - 1][0].isupper()):
+        # yield "initCaps_prev"
+    # if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
+        # yield "initCaps_next"
+    # if (previous_label != "^") and (words[i - 1][0].isupper()) and (i + 1 < len(words)) and (words[i + 1][0].isupper()):
+        # if words[i][0].isupper(): 
+            # yield "initCapsSequence"
+        # else:
+            # yield "notInitCapsSequence"
     
-    if (previous_label != '^'):
-        yield "previous_poses={0}".format(poses[i - 1])
-    yield "current_poses={0}".format(poses[i])
+    # yield "{0}".format(words[i])  
     
+    # if (previous_label != "^"):
+        # if (words[i - 1][0].isupper()):
+		    # yield "Prev,initCaps,{0}".format(words[i-1])
+        # else:
+		    # yield "Prev,notInitCaps,{0}".format(words[i-1])
+    
+    # if (i + 1 < len(words)):
+        # if (words[i + 1][0].isupper()):
+		    # yield "Next,initCaps,{0}".format(words[i + 1])
+        # else:
+		    # yield "Next,notInitCaps,{0}".format(words[i + 1])
+    
+    if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-ORG"]) and (words[i][0].isupper()):
+        # yield "UNI-ORG"
+        yield "UNI-ORG={0}".format(string.lower(words[i - 1]))
+    
+    if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-LOC"]) and (words[i][0].isupper()):
+        # yield "UNI-LOC"
+        yield "UNI-LOC={0}".format(string.lower(words[i - 1]))
+        
+    if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-PER"]) and (words[i][0].isupper()):
+        # yield "UNI-PER"
+        yield "UNI-PER={0}".format(string.lower(words[i - 1]))
+    
+    if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-MISC"]) and (words[i][0].isupper()):
+        # yield "UNI-MISC"
+        yield "UNI-MISC={0}".format(string.lower(words[i - 1]))
             
 # |iterable| should yield sentences.
 # |iterable| should support multiple passes.
@@ -170,14 +113,31 @@ def train_model(options, iterable):
     # a better choice here (for |labelled_words|) but it could not be pickled.
     # C'est la vie.
     data["labelled_words"] = dict()
-
+    data["unigrams"] = dict()
+    data["post_unigrams"] = dict()
+    
     print >>sys.stderr, "*** Training options are:"
     print >>sys.stderr, "   ", options
 
     print >>sys.stderr, "*** First pass: Computing statistics..."
+    
+    unigrams = dict()
+    unigrams["B-ORG"] = defaultdict(long)
+    unigrams["B-MISC"] = defaultdict(long)
+    unigrams["B-LOC"] = defaultdict(long)
+    unigrams["B-PER"] = defaultdict(long)
+    
+    post_unigrams = dict()
+    post_unigrams["ORG"] = defaultdict(long)
+    post_unigrams["MISC"] = defaultdict(long)
+    post_unigrams["LOC"] = defaultdict(long)
+    post_unigrams["PER"] = defaultdict(long)
+    
     for n, sentence in enumerate(iterable):
         if (n % 1000) == 0:
             print >>sys.stderr, "   {0:6d} sentences...".format(n)
+        previous_word = "^"
+        previous_label = "^"
         for word, pos, label in sentence:
             data["word_frequencies"][word] += 1
             if label.startswith("B-") or label.startswith("I-"):
@@ -186,7 +146,23 @@ def train_model(options, iterable):
                 else:
                     data["labelled_words"][word] = defaultdict(long)
                     data["labelled_words"][word][label] = 1
-
+            if label.startswith("B-") and (previous_word != "^"):
+                unigrams[label][string.lower(previous_word)] += 1
+            if (previous_label != 'O') and (previous_label != '^'):
+                post_unigrams[previous_label[2:]][string.lower(word)] += 1
+            previous_label = label
+            previous_word = word
+    
+    for label in unigrams:
+        all_sum = sum(unigrams[label][word] for word in unigrams[label])
+        data["unigrams"][label] = [word for word in unigrams[label] if 1.0 * unigrams[label][word] / all_sum > 0.005]
+        print >>sys.stderr, "*** Collected {0} unigrams for {1}".format(len(data["unigrams"][label]), label)
+    
+    for label in post_unigrams:
+        all_sum = sum(post_unigrams[label][word] for word in post_unigrams[label])
+        data["post_unigrams"][label] = [word for word in post_unigrams[label] if 1.0 * post_unigrams[label][word] / all_sum > 0.005]
+        print >>sys.stderr, "*** Collected {0} post_unigrams for {1}".format(len(data["post_unigrams"][label]), label)
+    
     print >>sys.stderr, "*** Second pass: Collecting features..."
     model.begin_add_event()
     for n, sentence in enumerate(iterable):
