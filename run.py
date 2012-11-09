@@ -33,6 +33,7 @@ def read_sentences(iterable):
 # at position |i - 1| is |previous_label|. You can pass any additional data
 # via |data| argument.
 
+# very important parameters! it's worth to play with them!
 MIN_WORD_FREQUENCY = 5
 MIN_LABEL_FREQUENCY = 5
 
@@ -47,43 +48,18 @@ def compute_features(data, words, poses, i, previous_label):
     labels = data["labelled_words"].get(words[i], dict())
     labels = filter(lambda item: item[1] > MIN_LABEL_FREQUENCY, labels.items())
     for label in labels:
-        yield "was-labelled-as={0}".format(label)
- 
-    # if ((previous_label == "^") or (words[i - 1] == '.')) and (words[i][0].isupper()):
-        # yield "firstword-InitCaps"
-    # if (previous_label != "^") and (words[i][0].isupper()):
-        # yield "initCaps"
-    # if ((previous_label == "^") or (words[i - 1] == '.')) and (not words[i][0].isupper()):
-        # yield "firstword-notInitCaps="
+        yield "was-labelled-as={0}".format(label) 
     
-    # mixedCaps !!!
-    # if (words[i].isupper()):
-        # yield "allCaps"
-
+    if not (words[i][0].isupper()):
+        yield "small_letter"
     
-    # if (previous_label != "^") and (words[i - 1][0].isupper()):
-        # yield "initCaps_prev"
-    # if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
-        # yield "initCaps_next"
-    # if (previous_label != "^") and (words[i - 1][0].isupper()) and (i + 1 < len(words)) and (words[i + 1][0].isupper()):
-        # if words[i][0].isupper(): 
-            # yield "initCapsSequence"
-        # else:
-            # yield "notInitCapsSequence"
+    if (previous_label != 'O') and (previous_label != '^') and (words[i][0].isupper()):
+        yield "After.{0}".format(previous_label)
     
-    # yield "{0}".format(words[i])  
-    
-    # if (previous_label != "^"):
-        # if (words[i - 1][0].isupper()):
-		    # yield "Prev,initCaps,{0}".format(words[i-1])
-        # else:
-		    # yield "Prev,notInitCaps,{0}".format(words[i-1])
-    
-    # if (i + 1 < len(words)):
-        # if (words[i + 1][0].isupper()):
-		    # yield "Next,initCaps,{0}".format(words[i + 1])
-        # else:
-		    # yield "Next,notInitCaps,{0}".format(words[i + 1])
+    # if (previous_label == 'O') and (words[i][0].isupper()):
+        # yield "PrevPose.{0}".format(poses[i - 1])
+        # yield "CurPose.{0}".format(poses[i])
+        # yield "PrevPose-CurPose.{0}-{1}".format(poses[i-1], poses[i])
     
     if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-ORG"]) and (words[i][0].isupper()):
         # yield "UNI-ORG"
@@ -100,6 +76,23 @@ def compute_features(data, words, poses, i, previous_label):
     if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-MISC"]) and (words[i][0].isupper()):
         # yield "UNI-MISC"
         yield "UNI-MISC={0}".format(string.lower(words[i - 1]))
+        
+        
+    # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["ORG"]) and (words[i][0].isupper()):
+        # # yield "UNI-ORG"
+        # yield "POST-UNI-ORG={0}".format(string.lower(words[i + 1]))
+    
+    # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["LOC"]) and (words[i][0].isupper()):
+        # # yield "UNI-LOC"
+        # yield "POST-UNI-LOC={0}".format(string.lower(words[i + 1]))
+        
+    # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["PER"]) and (words[i][0].isupper()):
+        # # yield "UNI-PER"
+        # yield "POST-UNI-PER={0}".format(string.lower(words[i + 1]))
+    
+    # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["MISC"]) and (words[i][0].isupper()):
+        # # yield "UNI-MISC"
+        # yield "POST-UNI-MISC={0}".format(string.lower(words[i + 1]))
             
 # |iterable| should yield sentences.
 # |iterable| should support multiple passes.
@@ -148,6 +141,7 @@ def train_model(options, iterable):
                     data["labelled_words"][word][label] = 1
             if label.startswith("B-") and (previous_word != "^"):
                 unigrams[label][string.lower(previous_word)] += 1
+                
             if (previous_label != 'O') and (previous_label != '^'):
                 post_unigrams[previous_label[2:]][string.lower(word)] += 1
             previous_label = label
@@ -158,10 +152,10 @@ def train_model(options, iterable):
         data["unigrams"][label] = [word for word in unigrams[label] if 1.0 * unigrams[label][word] / all_sum > 0.005]
         print >>sys.stderr, "*** Collected {0} unigrams for {1}".format(len(data["unigrams"][label]), label)
     
-    for label in post_unigrams:
-        all_sum = sum(post_unigrams[label][word] for word in post_unigrams[label])
-        data["post_unigrams"][label] = [word for word in post_unigrams[label] if 1.0 * post_unigrams[label][word] / all_sum > 0.005]
-        print >>sys.stderr, "*** Collected {0} post_unigrams for {1}".format(len(data["post_unigrams"][label]), label)
+    # for label in post_unigrams:
+        # all_sum = sum(post_unigrams[label][word] for word in post_unigrams[label])
+        # data["post_unigrams"][label] = [word for word in post_unigrams[label] if 1.0 * post_unigrams[label][word] / all_sum > 0.005]
+        # print >>sys.stderr, "*** Collected {0} post_unigrams for {1}".format(len(data["post_unigrams"][label]), label)
     
     print >>sys.stderr, "*** Second pass: Collecting features..."
     model.begin_add_event()
@@ -205,8 +199,13 @@ def eval_model(options, iterable):
         words, poses = map(list, zip(*sentence))
         labels = eval_model_sentence(options, data, model, words, poses)
 
+        ## some post-proccessing for remove sequences: O I-ORG O
+        previous_label = '^'
         for word, pos, label in zip(words, poses, labels):
+            if (label.startswith('I-')) and ((previous_label == 'O') or (previous_label == '^')):
+                label = 'B' + label[1:]
             print label
+            previous_label = label
         print
 
 # This is a helper method for |eval_model_sentence| and, actually,
