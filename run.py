@@ -57,6 +57,7 @@ def compute_features(data, words, poses, i, previous_label):
     
     if not (words[i][0].isupper()):
         yield "small_letter"
+        
         # if (previous_label != '^') and (i + 1 < len(words)) and (words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
             # yield "small_letter_in_sequence.{0}.{1}".format(words[i], previous_label)
             
@@ -75,22 +76,22 @@ def compute_features(data, words, poses, i, previous_label):
     if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-ORG"]) and (words[i][0].isupper()):
         # yield "UNI-ORG"
         flag = 1
-        yield "UNI-ORG={0}".format(string.lower(words[i - 1]))
+        yield "UNI-ORG={0}.{1}.{2}".format(string.lower(words[i - 1]), poses[i - 1], poses[i])
     
     if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-LOC"]) and (words[i][0].isupper()):
         # yield "UNI-LOC"
         flag = 1
-        yield "UNI-LOC={0}".format(string.lower(words[i - 1]))
+        yield "UNI-LOC={0}.{1}.{2}".format(string.lower(words[i - 1]), poses[i - 1], poses[i])
         
     if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-PER"]) and (words[i][0].isupper()):
         # yield "UNI-PER"
         flag = 1
-        yield "UNI-PER={0}".format(string.lower(words[i - 1]))
+        yield "UNI-PER={0}.{1}.{2}".format(string.lower(words[i - 1]), poses[i - 1], poses[i])
     
     if (previous_label != "^") and (string.lower(words[i - 1]) in data["unigrams"]["B-MISC"]) and (words[i][0].isupper()):
         # yield "UNI-MISC"
         flag = 1
-        yield "UNI-MISC={0}".format(string.lower(words[i - 1]))
+        yield "UNI-MISC={0}.{1}.{2}".format(string.lower(words[i - 1]), poses[i - 1], poses[i])
         
     if (flag == 0) and (previous_label != 'O') and (previous_label != '^') and (words[i][0].isupper()):
         flag = 1
@@ -98,7 +99,7 @@ def compute_features(data, words, poses, i, previous_label):
         
     if (flag == 0) and (previous_label == 'O') and (previous_label != '^') and (words[i][0].isupper()):
         yield "AfterPos.{0}.{1}".format(previous_label, poses[i - 1])
-        
+             
     # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["ORG"]) and (words[i][0].isupper()):
         # # yield "UNI-ORG"
         # yield "POST-UNI-ORG={0}".format(string.lower(words[i + 1]))
@@ -169,7 +170,6 @@ def train_model(options, iterable):
             previous_label = label
             previous_word = word
     
-
     unigram_counters = [Counter(unigrams[key]) for key in unigrams]
     total_count = Counter()
     for counter in unigram_counters:
@@ -182,12 +182,12 @@ def train_model(options, iterable):
         all_sum = sum([unigrams[label][word] for word in unigrams[label]])
         uni = sorted([[(1.0 * unigrams[label][word] * inv_total_freq[word] / all_sum ), word] for word in unigrams[label]])
         uni = [word[1] for word in uni]
-        data["unigrams"][label] = uni[-25:]
-        print >>sys.stderr, "*** Collected {0} unigrams for {1}".format(len(data["unigrams"][label]), label)
+        data["unigrams"][label] = uni[-20:]
+        # print >>sys.stderr, "*** Collected {0} unigrams for {1}".format(len(data["unigrams"][label]), label)
     
     
 
-    print data["unigrams"]
+    # print >> sys.stderr, data["unigrams"]
     
     # for label in post_unigrams:
         # all_sum = sum(post_unigrams[label][word] for word in post_unigrams[label])
