@@ -53,7 +53,7 @@ def compute_features(data, words, poses, i, previous_label):
 
     if data["word_frequencies"].get(string.lower(words[i]), 0) >= MIN_WORD_FREQUENCY:
         yield "word-current={0}".format(string.lower(words[i]))
-
+      
     labels = data["labelled_words"].get(string.lower(words[i]), dict())
     labels = filter(lambda item: item[1] > MIN_LABEL_FREQUENCY, labels.items())
     for label in labels:
@@ -62,14 +62,9 @@ def compute_features(data, words, poses, i, previous_label):
     
     if not (words[i][0].isupper()):
         yield "small_letter"
-        
-<<<<<<< HEAD
-        # if (previous_label != '^') and (i + 1 < len(words)) and (words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
-            # yield "small_letter_in_sequence.{0}.{1}".format(words[i], previous_label)
-=======
+  
         if (previous_label != '^') and (i + 1 < len(words)) and (words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
             yield "small_letter_in_sequence.{0}.{1}".format(words[i], previous_label)
->>>>>>> 60.64 on spanish test
             
     
     if (previous_label == '^'):
@@ -112,22 +107,7 @@ def compute_features(data, words, poses, i, previous_label):
             yield "NextWordInit.CapAfterPos.{0}.{1}".format(previous_label, poses[i - 1])
         else:
             yield "AfterPos.{0}.{1}".format(previous_label, poses[i - 1])
-             
-    # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["ORG"]) and (words[i][0].isupper()):
-        # # yield "UNI-ORG"
-        # yield "POST-UNI-ORG={0}".format(string.lower(words[i + 1]))
-    
-    # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["LOC"]) and (words[i][0].isupper()):
-        # # yield "UNI-LOC"
-        # yield "POST-UNI-LOC={0}".format(string.lower(words[i + 1]))
-        
-    # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["PER"]) and (words[i][0].isupper()):
-        # # yield "UNI-PER"
-        # yield "POST-UNI-PER={0}".format(string.lower(words[i + 1]))
-    
-    # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["MISC"]) and (words[i][0].isupper()):
-        # # yield "UNI-MISC"
-        # yield "POST-UNI-MISC={0}".format(string.lower(words[i + 1]))
+            
             
 # |iterable| should yield sentences.
 # |iterable| should support multiple passes.
