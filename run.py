@@ -102,10 +102,11 @@ def compute_features(data, words, poses, i, previous_label):
         yield "After.{0}".format(previous_label)
         
     if (flag == 0) and (previous_label == 'O') and (previous_label != '^') and (words[i][0].isupper()):
-        yield "AfterPos.{0}.{1}".format(previous_label, poses[i - 1])
-        if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
-            yield "NextWordInitCap"
         
+        if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
+            yield "NextWordInit.CapAfterPos.{0}.{1}".format(previous_label, poses[i - 1])
+        else:
+            yield "AfterPos.{0}.{1}".format(previous_label, poses[i - 1])
              
     # if (i + 1 < len(words)) and (string.lower(words[i + 1]) in data["post_unigrams"]["ORG"]) and (words[i][0].isupper()):
         # # yield "UNI-ORG"
