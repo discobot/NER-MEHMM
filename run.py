@@ -63,8 +63,13 @@ def compute_features(data, words, poses, i, previous_label):
     if not (words[i][0].isupper()):
         yield "small_letter"
         
+<<<<<<< HEAD
         # if (previous_label != '^') and (i + 1 < len(words)) and (words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
             # yield "small_letter_in_sequence.{0}.{1}".format(words[i], previous_label)
+=======
+        if (previous_label != '^') and (i + 1 < len(words)) and (words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
+            yield "small_letter_in_sequence.{0}.{1}".format(words[i], previous_label)
+>>>>>>> 60.64 on spanish test
             
     
     if (previous_label == '^'):
