@@ -65,18 +65,25 @@ def compute_features(data, words, poses, i, previous_label):
   
         if (previous_label != '^') and (i + 1 < len(words)) and (words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
             yield "small_letter_in_sequence.{0}.{1}".format(words[i], previous_label)
-            
+        if (previous_label != '^') and (i + 2 < len(words)) and (words[i - 1][0].isupper()) and (not words[i + 1][0].isupper()) and (words[i + 2][0].isupper()):
+            yield "double_small_letter_in_sequence1.{0}.{1}.{2}".format(words[i], words[i + 1], previous_label)
+        if (i > 1) and (i + 2 < len(words)) and (words[i - 2][0].isupper()) and (not words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
+            yield "double_small_letter_in_sequence2.{0}.{1}.{2}".format(words[i - 1], words[i], previous_label)
     
     if (previous_label == '^'):
         if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
             yield "FirstWord_NextWordIsUpper.{0}.{1}".format(poses[i], poses[i+1])
-            
-    
-    # if (previous_label == 'O') and (words[i][0].isupper()):
-    #     yield "PrevPose.{0}".format(poses[i - 1])
-    #     yield "CurPose.{0}".format(poses[i])
-    #     yield "PrevPose-CurPose.{0}-{1}".format(poses[i-1], poses[i])
-    
+        if (i + 3 < len(words)) and (not words[i + 1][0].isupper()) and (not words[i + 2][0].isupper()) and (words[i + 3][0].isupper()):
+            yield "very_long_sequence.{0}.{1}".format(words[i + 1], words[i + 2])
+        elif (i + 2 < len(words)) and (not words[i + 1][0].isupper()) and (words[i + 2][0].isupper()):
+            yield "long_sequence.{0}".format(words[i + 1])
+        if (i + 1 < len(words)):
+            yield "PosesC.{0}".format(poses[i])
+            yield "PosesCN.{0}-{1}".format(poses[i], poses[i + 1])
+            yield "WordsN.{0}".format(words[i + 1])
+        else:
+            yield "PosesC.{0}".format(poses[i])
+               
     flag = 0
     if (previous_label == "O") and (string.lower(words[i - 1]) in data["unigrams"]["B-ORG"]) and (words[i][0].isupper()):
         # yield "UNI-ORG"
@@ -100,14 +107,17 @@ def compute_features(data, words, poses, i, previous_label):
         
     if (previous_label != 'O') and (previous_label != '^') and (words[i][0].isupper()):
         yield "After.{0}".format(previous_label)
-        
-    if (flag == 0) and (previous_label == 'O') and (previous_label != '^') and (words[i][0].isupper()):
-        
+    
+    if (flag == 0) and (previous_label == 'O') and (words[i][0].isupper()):    
         if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
             yield "NextWordInit.CapAfterPos.{0}.{1}".format(previous_label, poses[i - 1])
         else:
-            yield "AfterPos.{0}.{1}".format(previous_label, poses[i - 1])
-            
+            yield "AfterPos.{0}.{1}".format(previous_label, poses[i - 1])        
+        if (i > 1) and (not words[i - 1][0].isupper()) and (words[i - 2][0].isupper()):
+            yield "prev_long_sequence.{0}".format(words[i - 1])
+        elif (i > 2) and (not words[i - 1][0].isupper()) and (not words[i - 2][0].isupper()) and (words[i - 3][0].isupper()):
+            yield "prev_long_sequence.{0}.{1}".format(words[i - 2], words[i - 1])
+          
             
 # |iterable| should yield sentences.
 # |iterable| should support multiple passes.
@@ -231,9 +241,13 @@ def eval_model(options, iterable):
 
         ## some post-proccessing for remove sequences: O I-ORG O
         previous_label = '^'
-        for word, pos, label in zip(words, poses, labels):
+
+        for i in xrange(0, len(words)):
+            label = labels[i]            
             if (label.startswith('I-')) and ((previous_label == 'O') or (previous_label == '^')):
                 label = 'B' + label[1:]
+            # if (i + 1 < len(words)) and (labels[i + 1] != 'O') and (labels[i] != 'O') and (labels[i + 1][0] != 'B') and (labels[i + 1][2:] != labels[i][2:]):
+                # label = labels[i][:1] + labels[i + 1][2:]
             print label
             previous_label = label
         print
