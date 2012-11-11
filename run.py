@@ -14,6 +14,8 @@ from collections import defaultdict
 try:
     from collections import Counter
 except:
+    # I have python 2.6 in cygwin
+    # counterfile is file with implementation of Counter
     from counterfile import Counter
 from maxent import MaxentModel
 from optparse import OptionParser
@@ -39,6 +41,18 @@ def is_number(s):
     except ValueError:
         return False
 
+def is_url(s):
+    dig = False
+    chars = False
+    punc = False
+    for ch in s:
+        if ch in string.punctuation:
+            punc = True
+        if ch in string.digits:
+            dig = True
+        if (ch in string.lowercase) or (ch in string.lowercase):
+            chars = True
+    return (dig and chars and punc)
 # |iterable| should yield lines.
 def read_sentences(iterable):
     sentence = []
@@ -51,6 +65,7 @@ def read_sentences(iterable):
             sentence.append(columns)
     if len(sentence) > 0:
         yield sentence
+
 
 # Computes (local) features for word at position |i| given that label for word
 # at position |i - 1| is |previous_label|. You can pass any additional data
@@ -72,9 +87,13 @@ def compute_features(data, words, poses, i, previous_label):
     labels = filter(lambda item: item[1] > MIN_LABEL_FREQUENCY, labels.items())
     for label in labels:
         yield "was-labelled-as={0}".format(label) 
-    
-
+        
     # here need some magic, I think.
+    # There are a lot of urls in text. But what to do with them?
+    # This doesn't work. Perhaps, my implemetation is just bad :-)
+    # Someone, fix is_url().
+    # if (is_url(words[i])):
+    #     yield "MayBeItsURL?"
     if (is_number(words[i])):
         yield "is_float"
     elif (len(words[i]) > 1) and (is_number(words[i][1:])):
