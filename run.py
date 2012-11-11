@@ -53,6 +53,7 @@ def is_url(s):
         if (ch in string.lowercase) or (ch in string.lowercase):
             chars = True
     return (dig and chars and punc)
+
 # |iterable| should yield lines.
 def read_sentences(iterable):
     sentence = []
@@ -73,7 +74,7 @@ def read_sentences(iterable):
 
 # very important parameters! it's worth to play with them!
 MIN_WORD_FREQUENCY = 5
-MIN_LABEL_FREQUENCY = 5
+MIN_LABEL_FREQUENCY = 2
 
 def compute_features(data, words, poses, i, previous_label):
     # Condition on previous label.
@@ -87,7 +88,7 @@ def compute_features(data, words, poses, i, previous_label):
     labels = filter(lambda item: item[1] > MIN_LABEL_FREQUENCY, labels.items())
     for label in labels:
         yield "was-labelled-as={0}".format(label) 
-        
+
     # here need some magic, I think.
     # There are a lot of urls in text. But what to do with them?
     # This doesn't work. Perhaps, my implemetation is just bad :-)
@@ -157,6 +158,10 @@ def compute_features(data, words, poses, i, previous_label):
         
     if (previous_label != 'O') and (previous_label != '^') and (words[i][0].isupper()):
         yield "After.{0}".format(previous_label)
+        if (i > 1) and (not words[i - 1][0].isupper()) and (words[i - 2][0].isupper()):
+            yield "prev_long_sequence.{0}".format(words[i - 1])
+        elif (i > 2) and (not words[i - 1][0].isupper()) and (not words[i - 2][0].isupper()) and (words[i - 3][0].isupper()):
+            yield "prev_very_long_sequence.{0}.{1}".format(words[i - 2], words[i - 1])
     
     if (flag == 0) and (previous_label == 'O') and (words[i][0].isupper()):    
         if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
@@ -170,14 +175,9 @@ def compute_features(data, words, poses, i, previous_label):
             yield "prev_word_is_number!"
         elif (i > 1) and (len(words[i - 1]) > 1) and (is_number(words[i - 1][1:])):
             yield "prev_word_is_almost_number!"
+       
         
-        if (i > 1) and (not words[i - 1][0].isupper()) and (words[i - 2][0].isupper()):
-            yield "prev_long_sequence.{0}".format(words[i - 1])
-        elif (i > 2) and (not words[i - 1][0].isupper()) and (not words[i - 2][0].isupper()) and (words[i - 3][0].isupper()):
-            yield "prev_long_sequence.{0}.{1}".format(words[i - 2], words[i - 1])
-        else:
-            
-            yield "previousWord={0}".format(string.lower(words[i - 1]))  
+        yield "previousWord={0}".format(string.lower(words[i - 1]))  
             
 # |iterable| should yield sentences.
 # |iterable| should support multiple passes.
@@ -205,9 +205,7 @@ def train_model(options, iterable):
     unigrams["B-MISC"] = defaultdict(long)
     unigrams["B-LOC"] = defaultdict(long)
     unigrams["B-PER"] = defaultdict(long)
-    
 
-    
     for n, sentence in enumerate(iterable):
         if (n % 1000) == 0:
             print >>sys.stderr, "   {0:6d} sentences...".format(n)
@@ -241,11 +239,7 @@ def train_model(options, iterable):
         uni = [word[1] for word in uni]
         data["unigrams"][label] = uni[-20:]
         # print >>sys.stderr, "*** Collected {0} unigrams for {1}".format(len(data["unigrams"][label]), label)
-    
-    
 
-
-    
     print >>sys.stderr, "*** Second pass: Collecting features..."
     model.begin_add_event()
     for n, sentence in enumerate(iterable):
