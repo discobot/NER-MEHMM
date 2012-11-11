@@ -237,7 +237,7 @@ def train_model(options, iterable):
         all_sum = sum([unigrams[label][word] for word in unigrams[label]])
         uni = sorted([[(1.0 * unigrams[label][word] * inv_total_freq[word] / all_sum ), word] for word in unigrams[label]])
         uni = [word[1] for word in uni]
-        data["unigrams"][label] = uni[-20:]
+        data["unigrams"][label] = uni[-50:]
         # print >>sys.stderr, "*** Collected {0} unigrams for {1}".format(len(data["unigrams"][label]), label)
 
     print >>sys.stderr, "*** Second pass: Collecting features..."
