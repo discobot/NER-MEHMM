@@ -114,9 +114,9 @@ def compute_features(data, words, poses, i, previous_label):
         yield "small_letter"
   
         if (previous_label != '^') and (i + 1 < len(words)) and (words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
-            yield "small_letter_in_sequence.{0}.{1}".format(words[i], previous_label)
+            yield "small_letter_in_sequence.{0}.{1}.{2}".format(words[i], previous_label, poses[i - 1])
         if (previous_label != '^') and (i + 2 < len(words)) and (words[i - 1][0].isupper()) and (not words[i + 1][0].isupper()) and (words[i + 2][0].isupper()):
-            yield "double_small_letter_in_sequence1.{0}.{1}.{2}".format(words[i], words[i + 1], previous_label)
+            yield "double_small_letter_in_sequence1.{0}.{1}.{2}.{3}".format(words[i], words[i + 1], previous_label, poses[i])
         if (i > 1) and (i + 2 < len(words)) and (words[i - 2][0].isupper()) and (not words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
             yield "double_small_letter_in_sequence2.{0}.{1}.{2}".format(words[i - 1], words[i], previous_label)
     
@@ -172,23 +172,33 @@ def compute_features(data, words, poses, i, previous_label):
         else:
             yield "AfterPosO.{0}".format(poses[i - 1]) 
             #  yield "WordsN.{0}".format(words[i + 1])  
-            if (i > 1):
-                yield "PPrevious_word.{0}".format(string.lower(words[i - 2]))
-                # yield "Previous_bigram.{0}.{1}".format(string.lower(words[i - 2]), string.lower(words[i - 1]))
+        yield "Previous_poses.{0}".format(string.lower(poses[i - 1]))
+        yield "Previous_word.{0}".format(string.lower(words[i - 1])) 
+
+        if (i > 1):
+            yield "PPrevious_word.{0}".format(string.lower(words[i - 2]))
+            yield "PPrevious_poses.{0}".format(string.lower(poses[i - 2]))
+        if (i > 2):
+            yield "PPPrevious_word.{0}".format(string.lower(words[i - 3]))
+            yield "PPPrevious_poses.{0}".format(string.lower(poses[i - 3]))
+        if (i > 3):
+            # it's right, don't worry! It's just magic :-)
+            yield "PPPrevious_word.{0}".format(string.lower(words[i - 4]))
+            yield "PPPrevious_poses.{0}".format(string.lower(poses[i - 4]))
+             
         if (i > 1) and (is_number(words[i - 1])):
             yield "prev_word_is_number!"
-        elif (i > 1) and (len(words[i - 1]) > 1) and (is_number(words[i - 1][1:])):
-            yield "prev_word_is_almost_number!"
+        # elif (i > 1) and (len(words[i - 1]) > 1) and (is_number(words[i - 1][1:])):
+        #     yield "prev_word_is_almost_number!"
        
-        
-        yield "previousWord={0}".format(string.lower(words[i - 1]))  
+         
             
 # |iterable| should yield sentences.
 # |iterable| should support multiple passes.
 def train_model(options, iterable):
     model = MaxentModel()
     data = {}
-    dumb_counter = 6
+    
 
     data["feature_set"] = set()
     data["word_frequencies"] = defaultdict(long)
