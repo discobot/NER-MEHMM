@@ -104,11 +104,11 @@ def compute_features(data, words, poses, i, previous_label):
     elif (len(words[i]) > 1) and (is_word(words[i][:-1])):
         yield "almost_word"
 
-    if (is_mixed_word(words[i])) and (words[i][0].isupper()):
-        yield "initCaps_and_is_mixed_word"
+    # if (is_mixed_word(words[i])) and (words[i][0].isupper()):
+        # yield "initCaps_and_is_mixed_word"
 
-    if (is_mixed_word(words[i])) and (not words[i][0].isupper()):
-        yield "NotinitCaps_and_is_mixed_word"
+    # if (is_mixed_word(words[i])) and (not words[i][0].isupper()):
+    #     yield "NotinitCaps_and_is_mixed_word"
 
     if (not words[i][0].isupper()):
         yield "small_letter"
@@ -165,8 +165,8 @@ def compute_features(data, words, poses, i, previous_label):
     
     if (flag == 0) and (previous_label == 'O') and (words[i][0].isupper()):    
         if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
-            if (is_mixed_word(words[i + 1])):
-                yield "NextWordIsBigAndMixed"
+            # if (is_mixed_word(words[i + 1])):
+            #     yield "NextWordIsBigAndMixed"
             yield "NextWordInit.CapAfterO.{0}".format(poses[i - 1])
             yield "NextBigWord".format(string.lower(words[i + 1]))
         else:
@@ -190,7 +190,6 @@ def compute_features(data, words, poses, i, previous_label):
             yield "prev_word_is_number!"
         # elif (i > 1) and (len(words[i - 1]) > 1) and (is_number(words[i - 1][1:])):
         #     yield "prev_word_is_almost_number!"
-       
          
             
 # |iterable| should yield sentences.
