@@ -170,7 +170,11 @@ def compute_features(data, words, poses, i, previous_label):
             yield "NextWordInit.CapAfterO.{0}".format(poses[i - 1])
             yield "NextBigWord".format(string.lower(words[i + 1]))
         else:
-            yield "AfterPosO.{0}".format(poses[i - 1])   
+            yield "AfterPosO.{0}".format(poses[i - 1]) 
+            #  yield "WordsN.{0}".format(words[i + 1])  
+            if (i > 1):
+                yield "PPrevious_word.{0}".format(string.lower(words[i - 2]))
+                # yield "Previous_bigram.{0}.{1}".format(string.lower(words[i - 2]), string.lower(words[i - 1]))
         if (i > 1) and (is_number(words[i - 1])):
             yield "prev_word_is_number!"
         elif (i > 1) and (len(words[i - 1]) > 1) and (is_number(words[i - 1][1:])):
