@@ -1,0 +1,14 @@
+-DOCSTART-	Start of the document
+Adj	Adjective
+Adv	Adverb
+Art	Article
+Conj	Conjunction
+Int	Interjunction
+Misc	Misc
+N	Noun
+Num	Numeral
+Prep	Preposition
+Pron	Pronoun
+Punc	Punctuation
+V	Verb
+

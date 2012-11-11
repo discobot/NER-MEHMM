@@ -1,0 +1,57 @@
+AO	Ordinals (primer, primeras, primera)
+AQ	Adjectives (mayores, mayor)
+CC	Coordinating conjunction (y, o)
+CS	Subordinating conjunction (1) that introduces finite clauses (apenas) (2) that introduces infinite clauses (al) (3) underspecified for subord-type (aunque)
+DA	Articles (un, las, la, unas)
+DD	Demonstrative pronouns (ésas, ése, esta)
+DE	Articles (un, las, la, unas)
+DI	Articles (un, las, la, unas)
+DN	Cardinals
+DP	Possessive pronouns (mi, su, sus)
+DT	Interrogative pronouns (quiénes, cuántas, cuánto)
+Faa	Full stop punctuation marks
+Fat	Full stop punctuation marks
+Fc	comma (,)
+Fd	colon (:)
+Fe	quotation symbol (" ' `)
+Fg	dash (-)
+Fh	slash (/)
+Fp	Full stop punctuation marks
+FPa	left parenthesis ("(", "[")
+FPt	right parenthesis (")", "]")
+Fs	POS tag for "..."
+Fx	semicolon (;)
+Fz	Symbols
+I	Proper nouns
+NC	Common nouns (mesas, mesa, libro, ordenador)
+NP	Proper nouns
+P0	Se (as particle)
+PD	Demonstrative pronouns (ésas, ése, esta)
+PI	Quantifiers (sendas, cada)
+PN	Cardinals
+PP	Clitic personal pronoun (le, les), Clitics and personal pronouns (nos, me, nosotras, te, sí)
+PR	que (as conjunction), Relative pronouns (cuyas, cuyo)
+PT	Relative pronouns (cuyas, cuyo)
+PX	Possessive pronouns (mi, su, sus)
+RG	Adverbs (muy, demasiado, cómo)
+RN	Negation
+SP	Preposition, Complex preposition "después del", Portmanteau word formed by de and el
+VAI	Verb haber. Finite
+VAN	Verb haber. Infinitive
+VAP	Verb haber. Past participle
+VAS	Verb haber. Gerund
+VMG	Lexical verb. Gerund
+VMI	Lexical verb. Finite
+VMM	Lexical verb. Finite
+VMN	Lexical verb. Infinitive
+VMP	Lexical verb. Past participle
+VMS	Lexical verb. Infinitive
+VSG	Verb ser. Gerund
+VSI	Verb ser. Finite
+VSM	Verb ser. Finite
+VSN	Verb ser. Infinitive
+VSP	Verb ser. Past participle
+VSS	Verb ser. Infinitive
+Y	Proper nouns
+Z	Cardinals
+
