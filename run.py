@@ -24,7 +24,21 @@ def is_word(s):
         if ch in s:
             return False
     return True
-    
+ 
+def is_mixed_word(s):
+    if (len(s) > 2):
+        for ch in s[1:]:
+            if ch.isupper():
+                return True
+    return False
+
+def is_number(s):
+    try:
+        x = float(s)
+        return True
+    except ValueError:
+        return False
+
 # |iterable| should yield lines.
 def read_sentences(iterable):
     sentence = []
@@ -59,8 +73,24 @@ def compute_features(data, words, poses, i, previous_label):
     for label in labels:
         yield "was-labelled-as={0}".format(label) 
     
-    
-    if not (words[i][0].isupper()):
+
+    # here need some magic, I think.
+    if (is_number(words[i])):
+        yield "is_float"
+    elif (len(words[i]) > 1) and (is_number(words[i][1:])):
+        yield "almost_is_float"
+    elif not (is_word(words[i])):
+        yield "not_word"
+    elif (len(words[i]) > 1) and (is_word(words[i][:-1])):
+        yield "almost_word"
+
+    if (is_mixed_word(words[i])) and (words[i][0].isupper()):
+        yield "initCaps_and_is_mixed_word"
+
+    if (is_mixed_word(words[i])) and (not words[i][0].isupper()):
+        yield "NotinitCaps_and_is_mixed_word"
+
+    if (not words[i][0].isupper()):
         yield "small_letter"
   
         if (previous_label != '^') and (i + 1 < len(words)) and (words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
@@ -73,13 +103,14 @@ def compute_features(data, words, poses, i, previous_label):
     if (previous_label == '^'):
         if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
             yield "FirstWord_NextWordIsUpper.{0}.{1}".format(poses[i], poses[i+1])
+            yield "NextBigWord".format(string.lower(words[i + 1]))
         if (i + 3 < len(words)) and (not words[i + 1][0].isupper()) and (not words[i + 2][0].isupper()) and (words[i + 3][0].isupper()):
             yield "very_long_sequence.{0}.{1}".format(words[i + 1], words[i + 2])
         elif (i + 2 < len(words)) and (not words[i + 1][0].isupper()) and (words[i + 2][0].isupper()):
             yield "long_sequence.{0}".format(words[i + 1])
-        if (i + 1 < len(words)):
+        elif (i + 1 < len(words)):
             yield "PosesC.{0}".format(poses[i])
-            yield "PosesCN.{0}-{1}".format(poses[i], poses[i + 1])
+            yield "PosesN.{0}".format(poses[i + 1])
             yield "WordsN.{0}".format(words[i + 1])
         else:
             yield "PosesC.{0}".format(poses[i])
@@ -88,36 +119,46 @@ def compute_features(data, words, poses, i, previous_label):
     if (previous_label == "O") and (string.lower(words[i - 1]) in data["unigrams"]["B-ORG"]) and (words[i][0].isupper()):
         # yield "UNI-ORG"
         flag = 1
-        yield "UNI-ORG={0}.{1}.{2}".format(string.lower(words[i - 1]), poses[i - 1], poses[i])
+        yield "UNI-ORG={0}".format(string.lower(words[i - 1]))
     
     if (previous_label == "O") and (string.lower(words[i - 1]) in data["unigrams"]["B-LOC"]) and (words[i][0].isupper()):
         # yield "UNI-LOC"
         flag = 1
-        yield "UNI-LOC={0}.{1}.{2}".format(string.lower(words[i - 1]), poses[i - 1], poses[i])
+        yield "UNI-LOC={0}".format(string.lower(words[i - 1]))
         
     if (previous_label == "O") and (string.lower(words[i - 1]) in data["unigrams"]["B-PER"]) and (words[i][0].isupper()):
         # yield "UNI-PER"
         flag = 1
-        yield "UNI-PER={0}.{1}.{2}".format(string.lower(words[i - 1]), poses[i - 1], poses[i])
+        yield "UNI-PER={0}".format(string.lower(words[i - 1]))
     
     if (previous_label == "O") and (string.lower(words[i - 1]) in data["unigrams"]["B-MISC"]) and (words[i][0].isupper()):
         # yield "UNI-MISC"
         flag = 1
-        yield "UNI-MISC={0}.{1}.{2}".format(string.lower(words[i - 1]), poses[i - 1], poses[i])
+        yield "UNI-MISC={0}".format(string.lower(words[i - 1]))
         
     if (previous_label != 'O') and (previous_label != '^') and (words[i][0].isupper()):
         yield "After.{0}".format(previous_label)
     
     if (flag == 0) and (previous_label == 'O') and (words[i][0].isupper()):    
         if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
-            yield "NextWordInit.CapAfterPos.{0}.{1}".format(previous_label, poses[i - 1])
+            if (is_mixed_word(words[i + 1])):
+                yield "NextWordIsBigAndMixed"
+            yield "NextWordInit.CapAfterO.{0}".format(poses[i - 1])
+            yield "NextBigWord".format(string.lower(words[i + 1]))
         else:
-            yield "AfterPos.{0}.{1}".format(previous_label, poses[i - 1])        
+            yield "AfterPosO.{0}".format(poses[i - 1])   
+        if (i > 1) and (is_number(words[i - 1])):
+            yield "prev_word_is_number!"
+        elif (i > 1) and (len(words[i - 1]) > 1) and (is_number(words[i - 1][1:])):
+            yield "prev_word_is_almost_number!"
+        
         if (i > 1) and (not words[i - 1][0].isupper()) and (words[i - 2][0].isupper()):
             yield "prev_long_sequence.{0}".format(words[i - 1])
         elif (i > 2) and (not words[i - 1][0].isupper()) and (not words[i - 2][0].isupper()) and (words[i - 3][0].isupper()):
             yield "prev_long_sequence.{0}.{1}".format(words[i - 2], words[i - 1])
-          
+        else:
+            
+            yield "previousWord={0}".format(string.lower(words[i - 1]))  
             
 # |iterable| should yield sentences.
 # |iterable| should support multiple passes.
@@ -133,7 +174,7 @@ def train_model(options, iterable):
     # C'est la vie.
     data["labelled_words"] = dict()
     data["unigrams"] = dict()
-    data["post_unigrams"] = dict()
+
     
     print >>sys.stderr, "*** Training options are:"
     print >>sys.stderr, "   ", options
@@ -146,11 +187,7 @@ def train_model(options, iterable):
     unigrams["B-LOC"] = defaultdict(long)
     unigrams["B-PER"] = defaultdict(long)
     
-    post_unigrams = dict()
-    post_unigrams["ORG"] = defaultdict(long)
-    post_unigrams["MISC"] = defaultdict(long)
-    post_unigrams["LOC"] = defaultdict(long)
-    post_unigrams["PER"] = defaultdict(long)
+
     
     for n, sentence in enumerate(iterable):
         if (n % 1000) == 0:
@@ -168,8 +205,6 @@ def train_model(options, iterable):
             if label.startswith("B-") and (previous_word != "^"):
                 unigrams[label][string.lower(previous_word)] += 1
                 
-            if (previous_label != 'O') and (previous_label != '^'):
-                post_unigrams[previous_label[2:]][string.lower(word)] += 1
             previous_label = label
             previous_word = word
     
@@ -190,12 +225,7 @@ def train_model(options, iterable):
     
     
 
-    # print >> sys.stderr, data["unigrams"]
-    
-    # for label in post_unigrams:
-        # all_sum = sum(post_unigrams[label][word] for word in post_unigrams[label])
-        # data["post_unigrams"][label] = [word for word in post_unigrams[label] if 1.0 * post_unigrams[label][word] / all_sum > 0.005]
-        # print >>sys.stderr, "*** Collected {0} post_unigrams for {1}".format(len(data["post_unigrams"][label]), label)
+
     
     print >>sys.stderr, "*** Second pass: Collecting features..."
     model.begin_add_event()
