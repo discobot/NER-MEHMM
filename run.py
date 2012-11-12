@@ -74,7 +74,7 @@ def read_sentences(iterable):
 
 # very important parameters! it's worth to play with them!
 MIN_WORD_FREQUENCY = 5
-MIN_LABEL_FREQUENCY = 2
+MIN_LABEL_FREQUENCY = 1
 
 def compute_features(data, words, poses, i, previous_label):
     # Condition on previous label.
@@ -94,7 +94,7 @@ def compute_features(data, words, poses, i, previous_label):
     # This doesn't work. Perhaps, my implemetation is just bad :-)
     # Someone, fix is_url().
     # if (is_url(words[i])):
-    #     yield "MayBeItsURL?"
+    # #     yield "MayBeItsURL?"
     if (is_number(words[i])):
         yield "is_float"
     elif (len(words[i]) > 1) and (is_number(words[i][1:])):
@@ -104,36 +104,42 @@ def compute_features(data, words, poses, i, previous_label):
     elif (len(words[i]) > 1) and (is_word(words[i][:-1])):
         yield "almost_word"
 
-    # if (is_mixed_word(words[i])) and (words[i][0].isupper()):
-        # yield "initCaps_and_is_mixed_word"
+    if (is_mixed_word(words[i])) and (words[i][0].isupper()):
+        yield "initCaps_and_is_mixed_word"
 
-    # if (is_mixed_word(words[i])) and (not words[i][0].isupper()):
-    #     yield "NotinitCaps_and_is_mixed_word"
+    if (is_mixed_word(words[i])) and (not words[i][0].isupper()):
+        yield "NotinitCaps_and_is_mixed_word"
+
+    yield "Current_poses.{0}".format(string.lower(poses[i]))
 
     if (not words[i][0].isupper()):
         yield "small_letter"
-  
+        
         if (previous_label != '^') and (i + 1 < len(words)) and (words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
             yield "small_letter_in_sequence.{0}.{1}.{2}".format(words[i], previous_label, poses[i - 1])
-        if (previous_label != '^') and (i + 2 < len(words)) and (words[i - 1][0].isupper()) and (not words[i + 1][0].isupper()) and (words[i + 2][0].isupper()):
-            yield "double_small_letter_in_sequence1.{0}.{1}.{2}.{3}".format(words[i], words[i + 1], previous_label, poses[i])
-        if (i > 1) and (i + 2 < len(words)) and (words[i - 2][0].isupper()) and (not words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
-            yield "double_small_letter_in_sequence2.{0}.{1}.{2}".format(words[i - 1], words[i], previous_label)
+        # elif (previous_label != '^') and (i + 2 < len(words)) and (words[i - 1][0].isupper()) and (not words[i + 1][0].isupper()) and (words[i + 2][0].isupper()):
+        #     yield "double_small_letter_in_sequence1.{0}.{1}.{2}.{3}".format(words[i], words[i + 1], previous_label, poses[i])
+        # elif (i > 1) and (i + 2 < len(words)) and (words[i - 2][0].isupper()) and (not words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
+        #     yield "double_small_letter_in_sequence2.{0}.{1}.{2}".format(words[i - 1], words[i], previous_label)
+        # elif (i + 1 < len(words)) and (words[i + 1][0].isupper()):
+        #     yield "NE_from_small_letter.{0}".format(words[i])
     
     if (previous_label == '^'):
-        if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
-            yield "FirstWord_NextWordIsUpper.{0}.{1}".format(poses[i], poses[i+1])
-            yield "NextBigWord".format(string.lower(words[i + 1]))
+        if (i + 1 < len(words)):
+            yield "PosesN.{0}".format(poses[i + 1])            
+            if (words[i + 1][0].isupper()):
+                yield "FirstWord_NextWordIsUpper"
+                yield "NextBigWord.{0}".format(string.lower(words[i + 1]))
+            else:                            
+                yield "WordsN.{0}".format(string.lower(words[i + 1]))
+
         if (i + 3 < len(words)) and (not words[i + 1][0].isupper()) and (not words[i + 2][0].isupper()) and (words[i + 3][0].isupper()):
-            yield "very_long_sequence.{0}.{1}".format(words[i + 1], words[i + 2])
+            yield "very_long_sequence.{0}.{1}".format(words[i + 1], words[i + 2])            
         elif (i + 2 < len(words)) and (not words[i + 1][0].isupper()) and (words[i + 2][0].isupper()):
             yield "long_sequence.{0}".format(words[i + 1])
-        elif (i + 1 < len(words)):
-            yield "PosesC.{0}".format(poses[i])
-            yield "PosesN.{0}".format(poses[i + 1])
-            yield "WordsN.{0}".format(words[i + 1])
-        else:
-            yield "PosesC.{0}".format(poses[i])
+
+        
+        
                
     flag = 0
     if (previous_label == "O") and (string.lower(words[i - 1]) in data["unigrams"]["B-ORG"]) and (words[i][0].isupper()):
@@ -158,23 +164,33 @@ def compute_features(data, words, poses, i, previous_label):
         
     if (previous_label != 'O') and (previous_label != '^') and (words[i][0].isupper()):
         yield "After.{0}".format(previous_label)
+        yield "PrevPoses.{0}".format(poses[i - 1]) 
         if (i > 1) and (not words[i - 1][0].isupper()) and (words[i - 2][0].isupper()):
             yield "prev_long_sequence.{0}".format(words[i - 1])
-        elif (i > 2) and (not words[i - 1][0].isupper()) and (not words[i - 2][0].isupper()) and (words[i - 3][0].isupper()):
-            yield "prev_very_long_sequence.{0}.{1}".format(words[i - 2], words[i - 1])
+
+        # elif (i > 2) and (not words[i - 1][0].isupper()) and (not words[i - 2][0].isupper()) and (words[i - 3][0].isupper()):
+        #     yield "prev_very_long_sequence.{0}.{1}".format(words[i - 2], words[i - 1])
     
     if (flag == 0) and (previous_label == 'O') and (words[i][0].isupper()):    
         if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
-            # if (is_mixed_word(words[i + 1])):
-            #     yield "NextWordIsBigAndMixed"
-            yield "NextWordInit.CapAfterO.{0}".format(poses[i - 1])
+            if (is_mixed_word(words[i + 1])):
+                yield "NextWordIsBigAndMixed"
+            yield "NextBigWordPose.{0}".format(string.lower(poses[i + 1]))
+            # yield "NextWordInit.CapAfterO.{0}".format(poses[i - 1])
             yield "NextBigWord".format(string.lower(words[i + 1]))
         else:
             yield "AfterPosO.{0}".format(poses[i - 1]) 
+            if (i + 1) < len(words):
+                yield "NextWordPose.{0}".format(string.lower(poses[i + 1]))
+            # if (i + 2) < len(words):
+            #     yield "NextNextWordPose.{0}".format(string.lower(poses[i + 2]))
+            # if (i + 3) < len(words):
+                # yield "NextNextWordPose.{0}".format(string.lower(poses[i + 3]))
             #  yield "WordsN.{0}".format(words[i + 1])  
         yield "Previous_poses.{0}".format(string.lower(poses[i - 1]))
         yield "Previous_word.{0}".format(string.lower(words[i - 1])) 
-
+        
+        # yield "Mixed_poses.{0}.{1}".format(string.lower(poses[i - 1]), string.lower(poses[i]))
         if (i > 1):
             yield "PPrevious_word.{0}".format(string.lower(words[i - 2]))
             yield "PPrevious_poses.{0}".format(string.lower(poses[i - 2]))
@@ -183,8 +199,8 @@ def compute_features(data, words, poses, i, previous_label):
             yield "PPPrevious_poses.{0}".format(string.lower(poses[i - 3]))
         if (i > 3):
             # it's right, don't worry! It's just magic :-)
-            yield "PPPrevious_word.{0}".format(string.lower(words[i - 4]))
-            yield "PPPrevious_poses.{0}".format(string.lower(poses[i - 4]))
+            yield "PPPPrevious_word.{0}".format(string.lower(words[i - 4]))
+            yield "PPPPrevious_poses.{0}".format(string.lower(poses[i - 4]))
              
         if (i > 1) and (is_number(words[i - 1])):
             yield "prev_word_is_number!"
