@@ -73,7 +73,11 @@ def read_sentences(iterable):
 # via |data| argument.
 
 # very important parameters! it's worth to play with them!
+<<<<<<< HEAD
 MIN_WORD_FREQUENCY = 5
+=======
+MIN_WORD_FREQUENCY = 3
+>>>>>>> 0.7323 on spanish
 MIN_LABEL_FREQUENCY = 1
 
 def compute_features(data, words, poses, i, previous_label):
@@ -99,7 +103,7 @@ def compute_features(data, words, poses, i, previous_label):
         yield "is_float"
     elif (len(words[i]) > 1) and (is_number(words[i][1:])):
         yield "almost_is_float"
-    elif not (is_word(words[i])):
+    if not (is_word(words[i])):
         yield "not_word"
     elif (len(words[i]) > 1) and (is_word(words[i][:-1])):
         yield "almost_word"
@@ -114,7 +118,12 @@ def compute_features(data, words, poses, i, previous_label):
 
     if (not words[i][0].isupper()):
         yield "small_letter"
+<<<<<<< HEAD
         
+=======
+        if (is_mixed_word(words[i])) and (not words[i][0].isupper()):
+            yield "NotinitCaps_and_is_mixed_word"
+>>>>>>> 0.7323 on spanish
         if (previous_label != '^') and (i + 1 < len(words)) and (words[i - 1][0].isupper()) and (words[i + 1][0].isupper()):
             yield "small_letter_in_sequence.{0}.{1}.{2}".format(words[i], previous_label, poses[i - 1])
         # elif (previous_label != '^') and (i + 2 < len(words)) and (words[i - 1][0].isupper()) and (not words[i + 1][0].isupper()) and (words[i + 2][0].isupper()):
@@ -171,7 +180,8 @@ def compute_features(data, words, poses, i, previous_label):
         # elif (i > 2) and (not words[i - 1][0].isupper()) and (not words[i - 2][0].isupper()) and (words[i - 3][0].isupper()):
         #     yield "prev_very_long_sequence.{0}.{1}".format(words[i - 2], words[i - 1])
     
-    if (flag == 0) and (previous_label == 'O') and (words[i][0].isupper()):    
+    if (flag == 0) and (previous_label == 'O') and (words[i][0].isupper()):   
+        yield "This_Word.{0}".format(words[i]) 
         if (i + 1 < len(words)) and (words[i + 1][0].isupper()):
             if (is_mixed_word(words[i + 1])):
                 yield "NextWordIsBigAndMixed"
@@ -403,4 +413,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
